@@ -1,6 +1,15 @@
+import common from '@ohos.app.ability.common';
 import { RepetitionLogic, IRecorderUI } from '../services/RepetitionLogic';
 import { SensorFrame } from '../SensorData';
 import { FileUtils } from '../services/FileUtils';
+import router from '@ohos.router';
+import { Exercise } from '../models/ExerciseData'; // Import Exercise for type safety
+
+// Define the interface for the router parameters expected by this view
+interface BaselineRouterParams {
+  exercise: Exercise;
+  startRecording?: boolean; // The optional flag passed from TrainingView
+}
 
 class BaselineDelegate implements IRecorderUI {
   private owner: BaselineView;
@@ -13,7 +22,7 @@ class BaselineDelegate implements IRecorderUI {
   onDataUpdate(duration: string, count: number) {
     this.owner.durationText = duration;
   }
-  onRepetitionComplete(){
+  onRepetitionComplete() {
 
   }
   onSessionStopped() {
@@ -23,23 +32,39 @@ class BaselineDelegate implements IRecorderUI {
 
 @Entry
 @Component
-export struct BaselineView {
+struct BaselineView {
   @State isRecording: boolean = false;
   @State statusMessage: string = "Ready to Record Baseline";
   @State statusColor: Color = Color.Gray;
   @State durationText: string = "0.00s";
   @State saveResult: string = "";
 
-  onBaselineComplete: () => void = () => {};
-
   private logic: RepetitionLogic | null = null;
   private settings: RenderingContextSettings = new RenderingContextSettings(true);
   private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings);
 
-  async aboutToAppear() {
-
+  aboutToAppear() {
+    // 1. Initialize logic and sensors
     this.logic = new RepetitionLogic(new BaselineDelegate(this));
     this.logic.initSensors();
+
+    let params = router.getParams();
+    let routerParams: BaselineRouterParams | null = null;
+
+    if (params) {
+      routerParams = params as BaselineRouterParams;
+    }
+
+    // Now ArkTS knows about the startRecording property
+    // Check if the parameter exists and is explicitly set to true
+    const startImmediately = routerParams && routerParams.startRecording === true;
+
+    if (startImmediately) {
+      console.info('BaselineView: Auto-starting recording session.');
+      // Call the toggleRec function to start the recording immediately
+      // This will set isRecording to true and update the UI
+      this.toggleRec();
+    }
   }
 
   aboutToDisappear() {
@@ -49,8 +74,8 @@ export struct BaselineView {
   toggleRec() {
     if (this.isRecording) {
       this.logic?.stopSession();
-      // Assume complete when stopping
-      this.onBaselineComplete();
+      // Assume complete when stopping manually
+      router.pushUrl({ url: 'pages/WorkoutView' });
     } else {
       this.saveResult = "";
       // FALSE = Single Rep Mode
@@ -61,20 +86,20 @@ export struct BaselineView {
 
   build() {
     Column() {
-      Text("BASELINE CREATING...")
-        .fontSize(12).fontWeight(FontWeight.Bold).margin(20)
-        .padding({top: 5})
+      Text("CREATE BASELINE")
+        .fontSize(14).fontWeight(FontWeight.Bold).margin(15)
 
       Canvas(this.context)
         .width('60%').height(80)
         .onReady(() => this.logic?.setCanvasContext(this.context))
 
-      Text(this.statusMessage).fontSize(14).fontColor(this.statusColor).margin(10)
+      Text(this.statusMessage).fontSize(14).fontColor(this.statusColor).padding({bottom : 3})
       Text(this.durationText).fontSize(14).fontWeight(FontWeight.Bold)
 
+      // This button still offers manual control if navigation didn't auto-start
       Button(this.isRecording ? "STOP" : "START BASELINE RECORDING")
-        .backgroundColor(this.isRecording ? Color.Red : Color.Blue)
-        .width('60%').height(40).margin(20)
+        .fontColor(this.isRecording ? Color.White : '#94A3B8')
+        .width('30%').height(25)
         .onClick(() => this.toggleRec())
 
       Text(this.saveResult).fontSize(12).fontColor(Color.Gray)

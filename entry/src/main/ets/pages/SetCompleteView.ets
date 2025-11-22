@@ -1,14 +1,14 @@
 import { SetCompleteData } from '../models/SetCompleteData';
+import router from '@ohos.router';
 
+@Entry
 @Component
-export struct SetCompleteView {
+struct SetCompleteView {
   @State setCompleteData: SetCompleteData = {
     reps: 6,
     accuracyPercentage: 92,
     coachFeedback: "Tempo matched the Ghost Rep perfectly. Heart rate stable. Increase weight. This is a significantly longer feedback message to test the scrolling behavior on a small wearable screen. Ensure this text is long enough to exceed the available space.",
   }
-
-  onFinish: () => void = () => {};
 
   build() {
     Scroll() {
@@ -66,7 +66,10 @@ export struct SetCompleteView {
           .backgroundColor('#424765')
           .borderRadius(8)
           .margin({ top: 5, bottom: 5 })
-          .onClick(this.onFinish)
+          .onClick(() => {
+            router.clear();
+            router.pushUrl({ url: 'pages/Index' });
+          })
       }
     }
     .width('100%')

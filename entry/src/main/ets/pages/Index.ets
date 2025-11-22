@@ -1,25 +1,14 @@
 import { Exercise, EXERCISE_DB } from '../models/ExerciseData';
-import { PermissionHelper } from '../services/PermissionHelper';
-import common from '@ohos.app.ability.common';
+import router from '@ohos.router';
 
+@Entry
 @Component
-export struct SelectionView {
-  // Callback to notify parent when user clicks Select
-  onExerciseSelect: (exercise: Exercise) => void = () => {};
-
+struct Index {
   private swiperController: SwiperController = new SwiperController();
   @State currentIndex: number = 0;
 
-  private permission_context = getContext(this) as common.UIAbilityContext;
-
-  async aboutToAppear() {
-
-    const granted: boolean = await PermissionHelper.requestHealthPermission(this.permission_context);
-  }
-
   build() {
     Stack() {
-
       Swiper(this.swiperController) {
         ForEach(EXERCISE_DB, (item: Exercise) => {
           Column({ space: 5 }) {
@@ -71,7 +60,12 @@ export struct SelectionView {
         .position({ x: '50%', y: '85%' })
         .translate({ x: '-50%', y: '-100%' })
         .onClick(() => {
-          this.onExerciseSelect(EXERCISE_DB[this.currentIndex]);
+          router.pushUrl({
+            url: 'pages/TrainingView',
+            params: {
+              exercise: EXERCISE_DB[this.currentIndex]
+            }
+          });
         })
 
       Circle()

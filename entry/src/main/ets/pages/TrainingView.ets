@@ -1,11 +1,42 @@
 import { Exercise } from '../models/ExerciseData';
 import router from '@ohos.router';
 
+interface RouterParams {
+  exercise: Exercise;
+}
+
+@Entry
 @Component
-export struct TrainingView {
-  @Prop exercise: Exercise;
-  onBack: () => void = () => {};
-  onStartBaseline: () => void = () => {};
+struct TrainingView {
+  @State exercise: Exercise = {
+    id: 'placeholder',
+    name: 'Loading Exercise...',
+    zone: 'Unknown',
+    image: $r('app.media.shoulderPress'),
+  };
+
+  onPageShow() {
+    let params = router.getParams();
+
+    // 2. Safely check if parameters were received
+    if (params) {
+      let routerParams = params as RouterParams;
+
+      this.exercise = routerParams.exercise;
+
+      console.info('TrainingView: Successfully loaded exercise: ' + this.exercise.name);
+    }
+  }
+
+  onBack: () => void = () => {
+    console.info("TrainingView: Back navigation triggered.");
+    router.back(); // Use router.back() to return to the previous page (Index)
+  };
+
+  onStartBaseline: () => void = () => {
+    console.info("TrainingView: Baseline recording started for " + this.exercise.name);
+    // Add logic for starting the recording here
+  };
 
   build() {
     Stack({ alignContent: Alignment.Center }) {
@@ -26,7 +57,7 @@ export struct TrainingView {
 
         Button() {
           Row({ space: 4 }) {
-            Text('Start recording')
+            Text('Record Golden Rep')
               .fontSize(14)
               .fontColor(Color.White)
               .fontWeight(FontWeight.Medium)
@@ -37,8 +68,15 @@ export struct TrainingView {
         .width('85%')
         .height(48)
         .onClick(() => {
-          console.info("Recording started for " + this.exercise.name);
-          this.onStartBaseline(); // Trigger navigation
+          console.info("Starting Baseline recording for " + this.exercise.name);
+          router.pushUrl({
+            url: 'pages/BaselineView',
+            params: {
+              exercise: this.exercise,
+              // *** NEW: Pass a flag to auto-start recording ***
+              startRecording: true
+            }
+          });
         })
 
       }
@@ -52,7 +90,6 @@ export struct TrainingView {
         .fillOpacity(0)
         .strokeWidth(8)
         .stroke('#1E293B')
-        // CRITICAL FIX: Allow clicks to pass through this overlay
         .hitTestBehavior(HitTestMode.None)
 
       Text('×')

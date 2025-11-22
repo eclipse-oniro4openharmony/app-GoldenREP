@@ -1,7 +1,10 @@
 {
   "src": [
+    "pages/Index",
+    "pages/TrainingView",
     "pages/BaselineView",
     "pages/WorkoutView",
+    "pages/SetCompleteView"
     "pages/TestAudioView"
   ]
 }

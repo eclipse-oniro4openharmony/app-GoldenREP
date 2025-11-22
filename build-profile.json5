@@ -5,7 +5,13 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          []
+          "certpath": "/Users/maiafilip/.ohos/config/default_DriveGuard_DsNjCXl5mmTpwdDSqIY4fBOJIrXrwNcUp4eLFJT5Aes=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001931049E8E1571D8711E3B0B4FBC15743F0BEA0FE9C22CBBB6A13D0192712859CD2EC279DE2A",
+          "profile": "/Users/maiafilip/.ohos/config/default_DriveGuard_DsNjCXl5mmTpwdDSqIY4fBOJIrXrwNcUp4eLFJT5Aes=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "/Users/maiafilip/.ohos/config/default_DriveGuard_DsNjCXl5mmTpwdDSqIY4fBOJIrXrwNcUp4eLFJT5Aes=.p12",
+          "storePassword": "00000019679BB33789F1C3C88FA816B38468AA4D2E4307A9B1D7D3A78C0F486FB70754D56CEE507A8F"
         }
       }
     ],
