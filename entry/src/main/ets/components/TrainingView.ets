@@ -1,4 +1,4 @@
-import { Exercise, EXERCISE_DB } from '../models/ExerciseData';
+import { Exercise } from '../models/ExerciseData';
 import router from '@ohos.router';
 
 @Component
@@ -26,7 +26,7 @@ export struct TrainingView {
 
         Button() {
           Row({ space: 4 }) {
-            Text('Record Ghost Rep')
+            Text('Start recording')
               .fontSize(14)
               .fontColor(Color.White)
               .fontWeight(FontWeight.Medium)
@@ -52,6 +52,8 @@ export struct TrainingView {
         .fillOpacity(0)
         .strokeWidth(8)
         .stroke('#1E293B')
+        // CRITICAL FIX: Allow clicks to pass through this overlay
+        .hitTestBehavior(HitTestMode.None)
 
       Text('×')
         .fontSize(30)

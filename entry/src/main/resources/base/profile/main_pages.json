@@ -1,6 +1,7 @@
 {
   "src": [
     "pages/BaselineView",
-    "pages/WorkoutView"
+    "pages/WorkoutView",
+    "pages/Index"
   ]
 }

@@ -65,11 +65,12 @@ export struct BaselineView {
 
   build() {
     Column() {
-      Text("CREATE BASELINE")
-        .fontSize(14).fontWeight(FontWeight.Bold).margin(20)
+      Text("BASELINE CREATING...")
+        .fontSize(12).fontWeight(FontWeight.Bold).margin(20)
+        .padding({top: 5})
 
       Canvas(this.context)
-        .width('60%').height(80).backgroundColor('#222')
+        .width('60%').height(80)
         .onReady(() => this.logic?.setCanvasContext(this.context))
 
       Text(this.statusMessage).fontSize(14).fontColor(this.statusColor).margin(10)
