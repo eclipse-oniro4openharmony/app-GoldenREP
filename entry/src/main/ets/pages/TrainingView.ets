@@ -57,7 +57,7 @@ struct TrainingView {
 
         Button() {
           Row({ space: 4 }) {
-            Text('Record Ghost Rep')
+            Text('Record Golden Rep')
               .fontSize(14)
               .fontColor(Color.White)
               .fontWeight(FontWeight.Medium)
@@ -72,7 +72,9 @@ struct TrainingView {
           router.pushUrl({
             url: 'pages/BaselineView',
             params: {
-              exercise: this.exercise
+              exercise: this.exercise,
+              // *** NEW: Pass a flag to auto-start recording ***
+              startRecording: true
             }
           });
         })

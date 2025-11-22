@@ -124,7 +124,7 @@ export class RepetitionLogic {
     this.isRecording = true; // The loop is running
 
     // Update UI
-    this.ui.onStatusChange("Recording... Move to start!", Color.Yellow);
+    this.ui.onStatusChange("Recording... Move to start!", Color.White);
     this.ui.onDataUpdate("0.00s", 0);
 
     this.timerId = setInterval(() => {
@@ -215,7 +215,7 @@ export class RepetitionLogic {
 
       // Debug: Update UI countdown
       let remaining = this.STABILITY_FRAMES_NEEDED - this.stabilityCounter;
-      this.ui.onStatusChange(`Hold steady... ${remaining}`, Color.Yellow);
+      this.ui.onStatusChange(`Hold steady... ${remaining}`, Color.White);
 
       if (this.stabilityCounter >= this.STABILITY_FRAMES_NEEDED) {
         // --- TRIGGER START ---
@@ -234,7 +234,7 @@ export class RepetitionLogic {
     } else {
       // Reset if user moved too much
       this.stabilityCounter = 0;
-      this.ui.onStatusChange("Hold still to calibrate...", Color.Yellow);
+      this.ui.onStatusChange("Hold still to calibrate...", Color.White);
     }
   }
 
