@@ -1,6 +1,20 @@
 {
   "app": {
-    "signingConfigs": [],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\Senan\\.ohos\\config\\default_DriveGuard_qEfeMBTpPbpuYJVYERpUJDpwEONxLyaj01_HkbgNRwc=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001B2369D0631C0B683D1BFE4BB7C8D6BFA7783218F32699506DF28FA3119372222D24CCD8EF7C516A",
+          "profile": "C:\\Users\\Senan\\.ohos\\config\\default_DriveGuard_qEfeMBTpPbpuYJVYERpUJDpwEONxLyaj01_HkbgNRwc=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\Senan\\.ohos\\config\\default_DriveGuard_qEfeMBTpPbpuYJVYERpUJDpwEONxLyaj01_HkbgNRwc=.p12",
+          "storePassword": "0000001BB3C025B842C02DB14AA5C356D908D88FC9148BD91D50C331B3A0C7F464DD51F66D10E99D021319"
+        }
+      }
+    ],
     "products": [
       {
         "name": "default",
