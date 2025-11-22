@@ -10,15 +10,10 @@ class WorkoutDelegate implements IRecorderUI {
     this.owner.statusColor = color as Color;
   }
   onDataUpdate(duration: string, count: number) {
-    // In workout mode, we might not care about individual rep duration as much
-    // But we can show it for debug
   }
   onRepetitionComplete(data: SensorFrame[]) {
     // Rep finished!
     this.owner.repCount++;
-
-    // OPTIONAL: Compare 'data' with loaded baseline here to give
-    // quality score (e.g., speed match, stability match)
   }
   onSessionStopped() {
     this.owner.isWorkoutActive = false;
