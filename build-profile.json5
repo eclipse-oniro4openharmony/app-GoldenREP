@@ -1,6 +1,20 @@
 {
   "app": {
-    "signingConfigs": [],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "/Users/maiafilip/.ohos/config/default_DriveGuard_DsNjCXl5mmTpwdDSqIY4fBOJIrXrwNcUp4eLFJT5Aes=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001BBFF876A50CD7CD8560F716275D8E7527919AC0723F0EF5EB1C3B0AF4CA9C0F489D2FDD18562486",
+          "profile": "/Users/maiafilip/.ohos/config/default_DriveGuard_DsNjCXl5mmTpwdDSqIY4fBOJIrXrwNcUp4eLFJT5Aes=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "/Users/maiafilip/.ohos/config/default_DriveGuard_DsNjCXl5mmTpwdDSqIY4fBOJIrXrwNcUp4eLFJT5Aes=.p12",
+          "storePassword": "0000001B3731310439D26077E36C9A31082AD31743BBB4D6218DCC0914A03627146AE016E3F64DE293AC26"
+        }
+      }
+    ],
     "products": [
       {
         "name": "default",
