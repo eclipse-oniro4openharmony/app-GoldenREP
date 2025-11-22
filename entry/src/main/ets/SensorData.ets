@@ -52,6 +52,7 @@ export class SensorFrame {
 
   accel: Vector3 = new Vector3();
   quaternion: Quaternion = new Quaternion();
+  heartRate: number = 0;
 }
 
 export class SensorBuffer {
@@ -63,4 +64,6 @@ export class SensorBuffer {
   quatY: number = 0;
   quatZ: number = 0;
   quatW: number = 1;
+
+  heartRate: number = 0;
 }

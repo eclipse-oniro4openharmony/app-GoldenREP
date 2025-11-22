@@ -77,6 +77,16 @@
           ],
           "when": "inuse"
         }
+      },
+      {
+        "name": "ohos.permission.READ_HEALTH_DATA",
+        "reason": "$string:permission_reason_sensor",
+        "usedScene": {
+          "abilities": [
+            "EntryAbility"
+          ],
+          "when": "inuse"
+        }
       }
     ]
   }

@@ -50,7 +50,6 @@ export class RepetitionLogic {
   private context: CanvasRenderingContext2D = new CanvasRenderingContext2D();
   private graphRenderer: GraphRendererService = new GraphRendererService();
 
-  //
   repCount: number = 0;
 
   constructor(uiDelegate: IRecorderUI) {
@@ -64,18 +63,26 @@ export class RepetitionLogic {
   // --- SENSOR SETUP ---
   initSensors() {
     try {
+      // 1. Accelerometer
       sensor.on(sensor.SensorId.ACCELEROMETER, (data) => {
         this.buffer.accelX = data.x;
         this.buffer.accelY = data.y;
         this.buffer.accelZ = data.z;
       }, { interval: 20000000 }); // 20ms
 
+      // 2. Rotation
       sensor.on(sensor.SensorId.ROTATION_VECTOR, (data) => {
         this.buffer.quatX = data.x;
         this.buffer.quatY = data.y;
         this.buffer.quatZ = data.z;
         this.buffer.quatW = data.w;
       }, { interval: 20000000 });
+
+      // 3. Heart Rate
+      // Heart rate updates much slower
+      sensor.on(sensor.SensorId.HEART_RATE, (data) => {
+        this.buffer.heartRate = data.heartRate;
+      }, { interval : 1000000000}); // 1 Second
 
     } catch (err) {
       console.error('Sensor init failed: ' + JSON.stringify(err));
@@ -158,6 +165,8 @@ export class RepetitionLogic {
     frame.elapsed_ms = elapsed;
     frame.accel = accel;
     frame.quaternion = quat;
+    //Save HeartRate to frame
+    frame.heartRate = this.buffer.heartRate
 
     this.recordedData.push(frame);
 
