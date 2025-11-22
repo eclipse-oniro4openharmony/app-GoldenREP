@@ -1,19 +1,22 @@
 import sensor from '@ohos.sensor';
-import common from '@ohos.app.ability.common';
 import vibrator from '@ohos.vibrator';
 import { SensorFrame, SensorBuffer, Vector3, Quaternion } from '../SensorData';
-import { FileUtils } from '../services/FileUtils';
 import { GraphRendererService } from '../services/GraphRendererService';
 
 // Interface so the Logic can talk to the UI
 export interface IRecorderUI {
   onStatusChange(message: string, color: number | string | Color): void; // Accepting Color type or raw value
   onDataUpdate(duration: string, frameCount: number): void;
-  onRecordingFinished(data: SensorFrame[]): void;
+  onRepetitionComplete(data: SensorFrame[]): void;
+  onSessionStopped(): void;
 }
 
 export class RepetitionLogic {
   private ui: IRecorderUI;
+
+  // --- CONFIGURATION ---
+  public isContinuousMode: boolean = false; // If true, restarts after rep finish
+
   // --- INTERNAL VARIABLES ---
   public isCapturing: boolean = false // True if we are in the active loop
   public isRecording: boolean = false; // True ONLY when actually saving data
@@ -102,16 +105,13 @@ export class RepetitionLogic {
   }
 
   // --- RECORDING LOOP ---
-  startSession() {
-    this.recordedData = [];
-    this.graphRenderer.reset(); // Reset graph helper
+  startSession(continuous: boolean) {
+    this.isContinuousMode = continuous;
+    this.resetStateForNextRep();
 
+    this.graphRenderer.reset(); // Reset graph helper
     // Reset Flags
     this.isRecording = true; // The loop is running
-    this.isCapturing = false; // But we aren't saving data yet (waiting for start)
-    this.hasMotionStarted = false;
-    this.stabilityCounter = 0;
-    this.idleFrameCounter = 0;
 
     // Update UI
     this.ui.onStatusChange("Recording... Move to start!", Color.Yellow);
@@ -127,18 +127,20 @@ export class RepetitionLogic {
     this.isCapturing = false;
     this.isRecording = false;
 
-    // Only save if we actually captured data
-    if (saveData && this.recordedData.length > 0) {
-      // Success Vibration (Longer double pulse feel)
-      this.triggerHaptic(200);
-      this.triggerHaptic(200);
+    this.triggerHaptic(200);
+    this.triggerHaptic(200);
 
+    this.ui.onStatusChange("Stopped", Color.Green);
+    this.ui.onSessionStopped();
+  }
 
-      this.ui.onStatusChange("Done", Color.Green);
-      this.ui.onRecordingFinished(this.recordedData);
-    } else {
-      this.ui.onStatusChange("Cancelled (No Data)", Color.Gray);
-    }
+  // Resets variables to wait for the user to hold still again
+  private resetStateForNextRep() {
+    this.recordedData = [];
+    this.isCapturing = false; // Waiting for stability
+    this.hasMotionStarted = false;
+    this.stabilityCounter = 0;
+    this.idleFrameCounter = 0;
   }
 
   /**
@@ -177,6 +179,8 @@ export class RepetitionLogic {
       this.graphRenderer.pushValue(currentAccel.y);
       this.graphRenderer.draw(this.context);
     }
+
+    if (!this.isRecording) return;
 
     // 3. Are we Waiting to Start? OR Are we Recording?
     if (!this.isCapturing) {
@@ -232,7 +236,7 @@ export class RepetitionLogic {
       this.ui.onStatusChange("Get Ready...", Color.Red);
       return;
     } else {
-      this.ui.onStatusChange("Ready...", Color.Red);
+      this.ui.onStatusChange("Recording...", Color.Green);
     }
 
     // 1. Calculate deviation from gravity (Motion Energy)
@@ -262,7 +266,7 @@ export class RepetitionLogic {
         this.ui.onStatusChange(`Hold position... ${this.IDLE_TIMEOUT_FRAMES - this.idleFrameCounter}`, Color.Green);
 
         if (this.idleFrameCounter >= this.IDLE_TIMEOUT_FRAMES) {
-          this.stopSession(); // Vibration happens inside stopRecording
+          this.finishRepetition();
         }
       } else {
         this.idleFrameCounter = 0;
@@ -272,6 +276,23 @@ export class RepetitionLogic {
           this.ui.onStatusChange("Recording...", Color.Red);
         }
       }
+    }
+  }
+
+  private finishRepetition() {
+    this.triggerHaptic(300); // Success vibration
+
+    // Send data to UI
+    this.ui.onRepetitionComplete(this.recordedData);
+
+    if (this.isContinuousMode) {
+      // RESET for next rep
+      this.ui.onStatusChange("Rep Complete! Resetting...", Color.Green);
+
+      this.resetStateForNextRep();
+    } else {
+      // STOP completely
+      this.stopSession();
     }
   }
 }
