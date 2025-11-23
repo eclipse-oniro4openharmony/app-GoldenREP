@@ -69,6 +69,7 @@ struct BaselineView {
       // Call the toggleRec function to start the recording immediately
       // This will set isRecording to true and update the UI
       this.toggleRec();
+
     }
   }
 
@@ -106,7 +107,8 @@ struct BaselineView {
         .fontColor(this.isRecording ? Color.White : '#94A3B8')
         .width('30%').height(25)
         .onClick(() => this.toggleRec())
-
+      Text(this.saveResult).fontSize(12).fontColor(Color.Gray)
     }
+    .width('100%').height('100%').justifyContent(FlexAlign.Center)
   }
 }
