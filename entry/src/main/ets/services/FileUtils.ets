@@ -19,7 +19,8 @@ export class FileUtils {
       let jsonString = JSON.stringify(data);
 
       // 3. Open/Create (Truncate to overwrite)
-      let file = fs.openSync(filePath, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE | fs.OpenMode.TRUNC);
+      //let file = fs.openSync(filePath, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE | fs.OpenMode.TRUNC);
+      let file = fs.openSync(filePath, fs.OpenMode.APPEND | fs.OpenMode.CREATE | fs.OpenMode.TRUNC);
 
       // 4. Write
       fs.writeSync(file.fd, jsonString);

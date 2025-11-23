@@ -2,6 +2,7 @@ import sensor from '@ohos.sensor';
 import vibrator from '@ohos.vibrator';
 import { SensorFrame, SensorBuffer, Vector3, Quaternion } from '../SensorData';
 import { GraphRendererService } from '../services/GraphRendererService';
+import { RepResult, SensorDataParser } from './SensorDataParser';
 
 // Interface so the Logic can talk to the UI
 export interface IRecorderUI {
@@ -9,10 +10,12 @@ export interface IRecorderUI {
   onDataUpdate(duration: string, frameCount: number): void;
   onSessionStopped(): void;
   onRepetitionComplete() : void;
+  onRepetitionResult(repResult: RepResult): void;
 }
 
 export class RepetitionLogic {
   private ui: IRecorderUI;
+  public currentExerciseName: string = "";
 
   // --- CONFIGURATION ---
   public isContinuousMode: boolean = false; // If true, restarts after rep finish
@@ -25,6 +28,10 @@ export class RepetitionLogic {
   private startTime: number = 0;
   private buffer: SensorBuffer = new SensorBuffer();
   private recordedData: SensorFrame[] = [];
+
+  // --- PROCESS DATA ---
+  private sensorDataParser: SensorDataParser = SensorDataParser.getInstance();
+
   // --- AUTO-STOP ---
   private startOrientation: Quaternion = new Quaternion(); // Stores inital orientation
   private hasMotionStarted: boolean = false;
@@ -49,6 +56,7 @@ export class RepetitionLogic {
   //private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings);
   private context: CanvasRenderingContext2D = new CanvasRenderingContext2D();
   private graphRenderer: GraphRendererService = new GraphRendererService();
+
 
   repCount: number = 0;
 
@@ -292,6 +300,7 @@ export class RepetitionLogic {
   }
 
   private finishRepetition() {
+    this.saveRepetition(this.recordedData)
     this.triggerHaptic(300); // Success vibration
 
     this.ui.onRepetitionComplete()
@@ -310,6 +319,17 @@ export class RepetitionLogic {
   }
 
   saveRepetition(data: SensorFrame[]) {
-    // TODO
+    if(!this.isContinuousMode) {
+      const setReferenceResult = this.sensorDataParser.setReference(data, this.currentExerciseName);
+      this.ui.onRepetitionResult(setReferenceResult)
+      return;
+    }
+    const repResult = this.sensorDataParser.processRepData(data);
+
+    this.ui.onRepetitionResult(repResult);
+  }
+
+  setExerciseName(exerciseName: string) {
+    this.currentExerciseName = exerciseName;
   }
 }

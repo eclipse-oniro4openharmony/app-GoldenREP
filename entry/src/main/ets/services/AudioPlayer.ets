@@ -4,101 +4,69 @@ import { BusinessError } from '@kit.BasicServicesKit';
 
 export class AudioPlayer {
   private avPlayer: media.AVPlayer | undefined = undefined;
-  private statusCallback: ((state: string) => void) | undefined = undefined;
-  private currentStatus: string = 'idle';
 
-  /**
-   * Initializes the AVPlayer instance.
-   * Must be called before loading or playing.
-   */
   async init() {
     try {
       this.avPlayer = await media.createAVPlayer();
-      this.setAVPlayerCallbacks();
+      // We don't need the complex state machine callback for this simple use case anymore
+      // unless you use it for UI updates.
+      this.avPlayer.on('error', (err: BusinessError) => {
+        console.error(`AudioPlayer Error: ${err.message}`);
+      });
     } catch (error) {
       console.error(`Failed to create AVPlayer: ${error}`);
     }
   }
 
-  /**
-   * Registers a callback to listen for state changes (e.g., 'playing', 'paused', 'prepared').
-   * Use this to update your UI @State.
-   */
-  onStatusChange(callback: (state: string) => void) {
-    this.statusCallback = callback;
-  }
-
-  /**
-   * Loads an audio file from the rawfile folder.
-   * @param context The UIAbilityContext (required to access resourceManager)
-   * @param filename The name of the file in src/main/resources/rawfile/
-   */
-  async loadRawAudio(context: common.UIAbilityContext, filename: string) {
+  // Updated: Returns a Promise that resolves ONLY when 'prepared'
+  async loadRawAudio(context: common.UIAbilityContext, filename: string): Promise<void> {
     if (!this.avPlayer) return;
 
-    try {
-      const fileDescriptor = await context.resourceManager.getRawFd(filename);
+    // 1. Reset first to ensure we are in a clean state from previous plays
+    await this.avPlayer.reset();
 
-      // Setting fdSrc triggers the 'initialized' state
-      this.avPlayer.fdSrc = {
-        fd: fileDescriptor.fd,
-        offset: fileDescriptor.offset,
-        length: fileDescriptor.length
+    return new Promise(async (resolve, reject) => {
+      if (!this.avPlayer) return reject("No Player");
+
+      // 2. Setup a one-time listener for the 'prepared' state
+      const stateChangeCallback = (state: media.AVPlayerState) => {
+        if (state === 'initialized') {
+          this.avPlayer?.prepare();
+        }
+        if (state === 'prepared') {
+          // We are ready to play! Remove listener and resolve.
+          this.avPlayer?.off('stateChange');
+          resolve();
+        }
       };
-    } catch (error) {
-      console.error(`Error loading raw file: ${error}`);
-    }
+
+      this.avPlayer.on('stateChange', stateChangeCallback);
+
+      try {
+        const fileDescriptor = await context.resourceManager.getRawFd(filename);
+        // 3. Setting this triggers 'initialized' -> which triggers 'prepare' above
+        this.avPlayer.fdSrc = {
+          fd: fileDescriptor.fd,
+          offset: fileDescriptor.offset,
+          length: fileDescriptor.length
+        };
+      } catch (error) {
+        this.avPlayer?.off('stateChange'); // clean up
+        reject(error);
+      }
+    });
   }
 
   play() {
-    // Guard clause: Only play if valid states
-    const validStates = ['prepared', 'paused', 'completed'];
-    if (this.avPlayer && validStates.includes(this.currentStatus)) {
-      this.avPlayer.play();
-    }
-  }
-
-  pause() {
-    if (this.avPlayer && this.currentStatus === 'playing') {
-      this.avPlayer.pause();
-    }
+    // We can be less defensive here because loadRawAudio ensures we are prepared
+    this.avPlayer?.play();
   }
 
   release() {
-    if (this.avPlayer) {
-      this.avPlayer.release();
-      this.avPlayer = undefined;
-    }
+    this.avPlayer?.release();
   }
 
-  // --- Internal Helper: State Machine ---
-  private setAVPlayerCallbacks() {
-    if (!this.avPlayer) return;
-
-    this.avPlayer.on('stateChange', (state: media.AVPlayerState) => {
-      this.currentStatus = state;
-
-      // Notify the UI
-      if (this.statusCallback) {
-        this.statusCallback(state);
-      }
-
-      // Handle internal logic
-      switch (state) {
-        case 'initialized':
-          this.avPlayer?.prepare(); // Automatically prepare when source is set
-          break;
-        case 'prepared':
-          console.info('AudioPlayer: Ready to play');
-          break;
-        case 'completed':
-          console.info('AudioPlayer: Playback finished');
-          break;
-      }
-    });
-
-    this.avPlayer.on('error', (err: BusinessError) => {
-      console.error(`AudioPlayer Error: ${err.message}`);
-    });
+  reset() {
+    this.avPlayer?.reset();
   }
 }

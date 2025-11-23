@@ -1,13 +1,24 @@
 import { SetCompleteData } from '../models/SetCompleteData';
 import router from '@ohos.router';
+import { SensorDataParser } from '../services/SensorDataParser';
 
 @Entry
 @Component
 struct SetCompleteView {
-  @State setCompleteData: SetCompleteData = {
-    reps: 6,
-    accuracyPercentage: 92,
-    coachFeedback: "Tempo matched the Ghost Rep perfectly. Heart rate stable. Increase weight. This is a significantly longer feedback message to test the scrolling behavior on a small wearable screen. Ensure this text is long enough to exceed the available space.",
+  //@State setCompleteData: SetCompleteData = {
+  //  reps: 6,
+  //  accuracyPercentage: 92,
+  //  coachFeedback: "Tempo matched the Ghost Rep perfectly. Heart rate stable. Increase weight. This is a significantly longer feedback message to test the scrolling behavior on a small wearable screen. Ensure this text is long enough to exceed the available space.",
+  //}
+  @State accuracy: number = 0;
+  @State reps: number = 0;
+  @State coachFeedback: string = "";
+
+  async aboutToAppear(): Promise<void> {
+    const sensorDataParser: SensorDataParser = SensorDataParser.getInstance();
+    this.accuracy = sensorDataParser.getAccuracy()
+    this.reps = sensorDataParser.getNumberOfReps()
+    this.coachFeedback = await sensorDataParser.requestFeedback();
   }
 
   build() {
@@ -21,8 +32,8 @@ struct SetCompleteView {
           .alignSelf(ItemAlign.Center)
 
         Row({ space: 12 }) {
-          this.StatBox('Reps', this.setCompleteData.reps.toString(), '#282C3A')
-          this.StatBox('Accuracy', `${this.setCompleteData.accuracyPercentage}%`, '#282C3A')
+          this.StatBox('Reps', this.reps.toString(), '#282C3A')
+          this.StatBox('Accuracy', `${Math.floor(this.accuracy*100)}%`, '#282C3A')
         }
         .padding({ bottom: 10 })
 
@@ -41,7 +52,7 @@ struct SetCompleteView {
           .margin({ bottom: 5 })
 
 
-          Text(`"${this.setCompleteData.coachFeedback}"`)
+          Text(`"${this.coachFeedback}"`)
             .fontSize(12)
             .fontColor(Color.White)
             .textAlign(TextAlign.Start)

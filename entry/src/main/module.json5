@@ -8,11 +8,6 @@
       "phone",
       "wearable"
     ],
-    "requestPermissions": [
-      {
-        "name": "ohos.permission.INTERNET"
-      }
-    ],
     "deliveryWithInstall": true,
     "installationFree": false,
     "pages": "$profile:main_pages",
@@ -95,6 +90,16 @@
       },
       {
         "name": "ohos.permission.READ_MEDIA",
+        "reason": "$string:permission_reason_sensor",
+        "usedScene": {
+          "abilities": [
+            "EntryAbility"
+          ],
+          "when": "inuse"
+        }
+      },
+      {
+        "name": "ohos.permission.INTERNET",
         "reason": "$string:permission_reason_sensor",
         "usedScene": {
           "abilities": [

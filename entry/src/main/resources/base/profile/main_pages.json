@@ -5,6 +5,5 @@
     "pages/BaselineView",
     "pages/WorkoutView",
     "pages/SetCompleteView"
-    "pages/TestAudioView"
   ]
 }

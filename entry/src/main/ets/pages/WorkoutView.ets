@@ -1,6 +1,9 @@
 import { RepetitionLogic, IRecorderUI } from '../services/RepetitionLogic';
-import { SensorFrame } from '../SensorData';
 import router from '@ohos.router';
+import { common } from '@kit.AbilityKit';
+import { RepResult } from '../services/SensorDataParser';
+import { FailureReason } from '../models/WorkoutModels'
+import { AudioPlayer } from '../services/AudioPlayer';
 
 class WorkoutDelegate implements IRecorderUI {
   private owner: WorkoutView;
@@ -19,6 +22,12 @@ class WorkoutDelegate implements IRecorderUI {
   onSessionStopped() {
     this.owner.isWorkoutActive = false;
   }
+  onRepetitionResult(repResult: RepResult): void {
+    this.owner.lastRepPerformance = repResult.isSuccessful;
+    this.owner.failureReason = repResult.failureReason;
+    this.owner.score = repResult.score;
+    this.owner.playSound(repResult.failureReason);
+  }
 }
 
 @Entry
@@ -31,18 +40,40 @@ struct WorkoutView {
   @State showConfetti: boolean = false;
   @State confettiText: string = "🎉";
   @State backgroundBlur: number = 0; // Add blur state
+  @State lastRepPerformance: boolean | undefined = undefined;
+  @State failureReason: FailureReason | undefined = undefined;
+  @State score: number = 0;
+
+  onFinishSet: () => void = () => {};
+
+  playSound: (failureReason: FailureReason | undefined) => Promise<void> = async (failureReason) => {
+    let filenamePrefix: string;
+    if(failureReason){
+      filenamePrefix = failureReason.toString()
+    } else {
+      filenamePrefix = 'FORM_GOOD'
+    }
+    const audioIndex = Math.floor(Math.random() * 2);
+    const context = getContext(this) as common.UIAbilityContext;
+    //await this.audioPlayer.loadRawAudio(context, 'HEARTRATE_HIGH_0.mp3');
+    await this.audioPlayer.loadRawAudio(context, `${filenamePrefix}_${audioIndex}.mp3`);
+    this.audioPlayer.play();
+  }
 
   private logic: RepetitionLogic | null = null;
   private settings: RenderingContextSettings = new RenderingContextSettings(true);
   private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings);
+  private audioPlayer: AudioPlayer = new AudioPlayer();
 
-  aboutToAppear(): void {
+  async aboutToAppear(): Promise<void> {
     this.logic = new RepetitionLogic(new WorkoutDelegate(this));
     this.logic.initSensors();
+    await this.audioPlayer.init();
   }
 
   aboutToDisappear(): void {
     this.logic?.stopSensors();
+    this.audioPlayer.release();
   }
 
   launchConfetti(): void {
@@ -113,6 +144,12 @@ struct WorkoutView {
           .fontColor(Color.Gray)
           .margin({ bottom: 20 })
 
+        Text(this.lastRepPerformance === undefined
+          ? undefined
+          : (this.lastRepPerformance ? "success" : "not success")
+        )
+        Text(this.score.toString())
+        Text(this.failureReason ? this.failureReason.toString() : '')
         Text(this.statusMessage)
           .fontSize(14)
           .fontColor(Color.White)
