@@ -1,5 +1,10 @@
 # GoldenRep
+<p align="center">
+<img width="250" height="250" alt="image" src="https://github.com/user-attachments/assets/651984e3-d89d-4a8f-8dc2-6186d0c77581" />
+</p>
+
 We’ve all been there: you’re at the gym, trying to push your limits, but as you get tired, your form slips. Bad form doesn't just mean fewer gains; it leads to injuries. Personal trainers are great, but they are expensive and can't be with you for every single rep.
+
 We wanted to digitize the experience of having a pro trainer who knows exactly how you move. We were inspired to build Golden Rep, a solution that captures your perfect movement when you are fresh and uses it as the "Gold Standard" to guide you through the rest of your workout.
 
 ## What it does
