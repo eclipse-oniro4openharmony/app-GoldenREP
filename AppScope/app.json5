@@ -1,0 +1,10 @@
+{
+  "app": {
+    "bundleName": "com.cache_me_if_you_can.driveguard",
+    "vendor": "example",
+    "versionCode": 1000000,
+    "versionName": "1.0.0",
+    "icon": "$media:startIcon",
+    "label": "$string:app_name"
+  }
+}
